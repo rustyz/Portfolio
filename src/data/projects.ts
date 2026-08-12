@@ -18,6 +18,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     id: "freezone-advisor",
+    image: "/images/icons/freezone-advisor.svg",
     title: "Freezone Advisor",
     category: "Deployed AI Agent",
     description:
@@ -28,6 +29,7 @@ export const projects: Project[] = [
   },
   {
     id: "process-line-erp",
+    image: "/images/icons/process-line-erp.svg",
     title: "Process-Line ERP",
     category: "Full-Stack ERP · Live",
     description:
@@ -38,6 +40,7 @@ export const projects: Project[] = [
   },
   {
     id: "agentic-rag-langgraph",
+    image: "/images/icons/agentic-rag-langgraph.svg",
     title: "Agentic RAG",
     category: "LangGraph + Local LLM",
     description:
@@ -48,6 +51,7 @@ export const projects: Project[] = [
   },
   {
     id: "agent-orchestration",
+    image: "/images/icons/agent-orchestration.svg",
     title: "Agent Orchestration",
     category: "Tool Use & Memory",
     description:
@@ -58,6 +62,7 @@ export const projects: Project[] = [
   },
   {
     id: "llm-cost-autopilot",
+    image: "/images/icons/llm-cost-autopilot.svg",
     title: "LLM Cost Autopilot",
     category: "Complexity-Based Routing",
     description:
@@ -68,6 +73,7 @@ export const projects: Project[] = [
   },
   {
     id: "prompt-ab-testing",
+    image: "/images/icons/prompt-ab-testing.svg",
     title: "Prompt A/B Testing",
     category: "Eval Infrastructure",
     description:
@@ -78,6 +84,7 @@ export const projects: Project[] = [
   },
   {
     id: "rag-hybrid-search",
+    image: "/images/icons/rag-hybrid-search.svg",
     title: "Hybrid Search RAG",
     category: "Retrieval Pipeline",
     description:
@@ -110,6 +117,7 @@ export const projects: Project[] = [
   },
   {
     id: "predictive-maintenance",
+    image: "/images/icons/predictive-maintenance.svg",
     title: "Predictive Maintenance",
     category: "ML · In Progress",
     description:
