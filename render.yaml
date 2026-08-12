@@ -1,0 +1,13 @@
+# Render Blueprint — deploys this as a free static site.
+# On Render: New -> Blueprint -> point at this repo, or New -> Static Site
+# and set these same values manually in the dashboard.
+services:
+  - type: web
+    name: rishi-portfolio
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
