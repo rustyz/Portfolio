@@ -1,10 +1,13 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { projects } from "../data/projects";
 
-const SPANS = ["md:col-span-7", "md:col-span-5", "md:col-span-5", "md:col-span-7", "md:col-span-7", "md:col-span-5"];
-const HUES = [210, 260, 160, 30, 340, 190];
+const spanFor = (i: number) => (i % 3 === 2 ? "md:col-span-7" : "md:col-span-5");
+const hueFor = (i: number) => (i * 47) % 360;
 
 export default function SelectedWorks() {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   return (
     <section id="work" className="bg-bg py-12 md:py-16">
       <div className="max-w-[1200px] mx-auto px-6 md:px-10 lg:px-16">
@@ -24,9 +27,10 @@ export default function SelectedWorks() {
               Featured <span className="italic">projects</span>
             </h2>
             <p className="text-sm md:text-base text-muted max-w-md">
-              Six real, working projects — from a deployed production agent to
-              the infrastructure most AI demos skip: evals, cost routing, and
-              hybrid search.
+              Real projects — deployed agents, live ERP work, and the
+              infrastructure most AI demos skip: evals, cost routing, and
+              hybrid search. Cards without a public repo expand in place
+              instead of linking to an empty page.
             </p>
           </div>
           <a
@@ -41,50 +45,155 @@ export default function SelectedWorks() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
-          {projects.map((project, i) => (
-            <motion.a
-              key={project.id}
-              href={project.link ?? "https://github.com/rustyz"}
-              target="_blank"
-              rel="noreferrer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
-              viewport={{ once: true, margin: "-80px" }}
-              className={`group relative aspect-[4/3] md:aspect-auto md:h-72 rounded-3xl border border-stroke bg-surface overflow-hidden ${SPANS[i]}`}
-            >
-              <div
-                className="absolute inset-0 opacity-30 group-hover:scale-105 transition-transform duration-500"
-                style={{
-                  background: `radial-gradient(circle at 30% 20%, hsl(${HUES[i]} 60% 55%), transparent 60%)`,
-                }}
-                aria-hidden
-              />
-              <div
-                className="absolute inset-0 opacity-20 mix-blend-multiply"
-                style={{
-                  backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-                  backgroundSize: "4px 4px",
-                }}
-                aria-hidden
-              />
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                <span className="text-xs text-muted uppercase tracking-[0.2em]">{project.category}</span>
-                <div>
-                  <h3 className="text-2xl font-display text-text-primary mb-2">{project.title}</h3>
-                  <p className="text-xs text-muted line-clamp-2 max-w-sm">{project.description}</p>
+          {projects.map((project, i) => {
+            const isExpandable = !project.link;
+            const isExpanded = expandedId === project.id;
+
+            const cardInner = (
+              <>
+                {project.image ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:scale-105 group-hover:opacity-75 transition-all duration-500"
+                    style={{ backgroundImage: `url(${project.image})` }}
+                    aria-hidden
+                  />
+                ) : (
+                  <div
+                    className="absolute inset-0 opacity-30 group-hover:scale-105 transition-transform duration-500"
+                    style={{
+                      background: `radial-gradient(circle at 30% 20%, hsl(${hueFor(i)} 60% 55%), transparent 60%)`,
+                    }}
+                    aria-hidden
+                  />
+                )}
+                <div
+                  className="absolute inset-0 opacity-20 mix-blend-multiply"
+                  style={{
+                    backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
+                    backgroundSize: "4px 4px",
+                  }}
+                  aria-hidden
+                />
+                {project.image && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent" aria-hidden />
+                )}
+                <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                  <span className="text-xs text-muted uppercase tracking-[0.2em]">{project.category}</span>
+                  <div>
+                    <h3 className="text-2xl font-display text-text-primary mb-2">{project.title}</h3>
+                    <p className="text-xs text-muted line-clamp-2 max-w-sm">{project.description}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="absolute inset-0 bg-bg/70 opacity-0 group-hover:opacity-100 backdrop-blur-lg transition-opacity duration-300 flex items-center justify-center p-6">
-                <div className="relative rounded-full">
-                  <span className="absolute -inset-[2px] rounded-full accent-gradient-animated" />
-                  <span className="relative flex items-center gap-2 bg-surface text-text-primary rounded-full px-5 py-2.5 text-sm">
-                    View — <span className="font-display italic">{project.title}</span>
-                  </span>
-                </div>
-              </div>
-            </motion.a>
-          ))}
+                {!isExpandable && (
+                  <div className="absolute inset-0 bg-bg/70 opacity-0 group-hover:opacity-100 backdrop-blur-lg transition-opacity duration-300 flex items-center justify-center p-6">
+                    <div className="relative rounded-full">
+                      <span className="absolute -inset-[2px] rounded-full accent-gradient-animated" />
+                      <span className="relative flex items-center gap-2 bg-surface text-text-primary rounded-full px-5 py-2.5 text-sm">
+                        {project.linkLabel ?? "View"} — <span className="font-display italic">{project.title}</span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {isExpandable && !isExpanded && (
+                  <div className="absolute inset-0 bg-bg/70 opacity-0 group-hover:opacity-100 backdrop-blur-lg transition-opacity duration-300 flex items-center justify-center p-6">
+                    <span className="flex items-center gap-2 bg-surface text-text-primary rounded-full px-5 py-2.5 text-sm">
+                      Tap to read what's built <span aria-hidden>+</span>
+                    </span>
+                  </div>
+                )}
+              </>
+            );
+
+            if (!isExpandable) {
+              return (
+                <motion.a
+                  key={project.id}
+                  href={project.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  className={`group relative aspect-[4/3] md:aspect-auto md:h-72 rounded-3xl border border-stroke bg-surface overflow-hidden ${spanFor(i)}`}
+                >
+                  {cardInner}
+                </motion.a>
+              );
+            }
+
+            return (
+              <motion.div
+                key={project.id}
+                layout
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+                viewport={{ once: true, margin: "-80px" }}
+                className={`${spanFor(i)} ${isExpanded ? "md:col-span-12" : ""}`}
+              >
+                <motion.button
+                  layout
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : project.id)}
+                  aria-expanded={isExpanded}
+                  className={`group relative w-full text-left rounded-3xl border border-stroke bg-surface overflow-hidden cursor-pointer ${
+                    isExpanded ? "" : "aspect-[4/3] md:aspect-auto md:h-72"
+                  }`}
+                >
+                  {!isExpanded && cardInner}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                      >
+                        <div className="relative">
+                          {project.image ? (
+                            <div
+                              className="h-48 md:h-64 bg-cover bg-center"
+                              style={{ backgroundImage: `url(${project.image})` }}
+                            />
+                          ) : (
+                            <div
+                              className="h-32"
+                              style={{
+                                background: `radial-gradient(circle at 30% 20%, hsl(${hueFor(i)} 60% 55%), transparent 70%)`,
+                              }}
+                            />
+                          )}
+                          <span className="absolute top-4 right-4 text-xs text-muted bg-bg/70 backdrop-blur rounded-full px-3 py-1">
+                            Close ✕
+                          </span>
+                        </div>
+                        <div className="p-6 md:p-8">
+                          <span className="text-xs text-muted uppercase tracking-[0.2em]">{project.category}</span>
+                          <h3 className="text-2xl md:text-3xl font-display text-text-primary mt-2 mb-4">
+                            {project.title}
+                          </h3>
+                          <p className="text-sm md:text-base text-muted leading-relaxed max-w-3xl mb-5">
+                            {project.details ?? project.description}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {project.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-xs text-muted border border-stroke rounded-full px-3 py-1"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
