@@ -13,6 +13,13 @@ export interface Project {
   image?: string;
   /** Longer write-up shown when a no-link card is expanded. */
   details?: string;
+  /** Demo video shown at the top of the expanded card. */
+  video?: string;
+  videoPoster?: string;
+  /** Structured, TPM-style write-up shown when the card is expanded. */
+  caseStudy?: { heading: string; body?: string; bullets?: string[] }[];
+  /** Public, read-only demo login shown in the expanded card. */
+  demo?: { url: string; username: string; password: string; note?: string };
 }
 
 export const projects: Project[] = [
@@ -28,15 +35,77 @@ export const projects: Project[] = [
     linkLabel: "Live demo",
   },
   {
-    id: "process-line-erp",
-    image: "/images/icons/process-line-erp.svg",
-    title: "Process-Line ERP",
-    category: "Full-Stack ERP · Live",
+    id: "production-intelligence-platform",
+    image: "/images/production-intelligence.jpg",
+    title: "Production Intelligence Platform",
+    category: "Manufacturing · Live Demo",
     description:
-      "A full-stack ERP tracking a manufacturing process line end to end — raw materials through finished goods — with real-time OEE dashboards, defect Pareto tracking, live energy-per-unit monitoring, and an append-only audit trail.",
-    tags: ["FastAPI", "PostgreSQL", "CI/CD", "RBAC"],
+      "Live visibility of a manufacturing process line from raw-material intake to finished goods: stage status, OEE, defects by cause, and a full audit trail. Sits on top of a plant's existing database. Customisable, human-in-the-loop, governed by design.",
+    tags: ["FastAPI", "PostgreSQL", "RBAC", "Audit Trail", "OEE", "CI/CD"],
     link: "https://ei-erp-backend.onrender.com/",
-    linkLabel: "Live demo",
+    linkLabel: "Open live demo",
+    video: "/videos/production-intelligence-demo.mp4",
+    videoPoster: "/videos/production-intelligence-poster.jpg",
+    demo: {
+      url: "https://ei-erp-backend.onrender.com/",
+      username: "planner1",
+      password: "ChangeMe123!",
+      note: "Read-only planner account on synthetic data. The demo is on a free host, so the first load can take ~30 seconds to wake up.",
+    },
+    caseStudy: [
+      {
+        heading: "The problem",
+        body: "A manufacturer approached us with several production lines and no shared view between them. Nobody could say what each line was producing right now, or what was actually in stock. I had seen the same pattern across plastics, bakery and pharma: plenty of data sources, very little value extracted from them.",
+      },
+      {
+        heading: "My role",
+        body: "Scoped the problem with the client, defined what the first release had to do (and what it deliberately would not), made the architecture and build decisions, and led delivery through to a working, deployed platform.",
+      },
+      {
+        heading: "What's in the platform",
+        bullets: [
+          "Process-flow overview: live status for every stage (goods inward, moulding, auto-insertion, planning, execution, finished goods) with pending counts and last activity.",
+          "Goods inward and quality: receipts logged against controlled supplier and material master data, QC pass/fail/conditional, and logged supplier notifications instead of untracked phone calls.",
+          "OEE: calculated daily from batch and downtime records, broken into availability, performance and quality.",
+          "Defects by cause: coded against a fixed list, so a Pareto view shows the few causes driving most scrap.",
+          "Finished goods: what's in stock, what's shipped and what's still waiting.",
+          "Interactive charts: scroll to zoom, drag to pan, one-click reset.",
+        ],
+      },
+      {
+        heading: "Three principles, throughout",
+        bullets: [
+          "Customisable: stages, screens and reports are shaped around how each plant runs, and it connects to the database the plant already has rather than replacing it.",
+          "Human in the loop: people check quality, approve, correct and decide. The platform surfaces the signal; the team makes the call.",
+          "Governance by design: role-based access (admin, planner, operator), controlled master data, and corrections, never silent edits. Voiding a record requires a reason and the original stays in the audit trail.",
+        ],
+      },
+      {
+        heading: "Key decisions",
+        bullets: [
+          "Visibility before prediction: OEE and stage tracking first, because they create value from data plants already have. Prediction comes later, on trustworthy data.",
+          "Sit on top, don't replace: no rip-and-replace of existing systems, which keeps adoption risk low.",
+          "Synthetic demo data: protects client confidentiality and keeps the public demo reproducible.",
+        ],
+      },
+      {
+        heading: "What this makes possible",
+        body: "One live view across every line, shortages caught before they stop production, and losses ranked so the biggest gets fixed first. Illustratively, on a two-shift line (16 h × 250 days = 4,000 scheduled hours), every 5 points of OEE is about 200 extra productive hours a year with no new equipment.",
+      },
+      {
+        heading: "Status and what's next",
+        body: "Built and deployed as a working prototype; not yet in production use, so there are no client results to report yet. Next on the roadmap: job scheduling, full energy and environmental monitoring, and connectors for CRM, ERP and other existing data sources. Pilot partners help decide what gets built first.",
+      },
+      {
+        heading: "Suggested 3-minute tour",
+        bullets: [
+          "Overview: scroll past the stage cards to the OEE and defects charts, and zoom into a week.",
+          "Goods Inward: follow a receipt through QC to the supplier notification log.",
+          "Moulding: find the struck-through voided batches; that's the audit trail at work.",
+          "Finished Goods: check what's in stock against what's shipped.",
+        ],
+      },
+    ],
   },
   {
     id: "agentic-rag-langgraph",

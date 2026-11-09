@@ -74,7 +74,7 @@ export default function Hero() {
             See work
           </a>
           <a
-            href="mailto:prishi34@gmail.com"
+            href="#contact"
             className="rounded-full text-sm px-7 py-3.5 border-2 border-stroke bg-bg text-text-primary hover:scale-105 hover:border-transparent transition-all relative group"
           >
             <span className="absolute -inset-[2px] rounded-full accent-gradient opacity-0 group-hover:opacity-100 -z-10 transition-opacity" />

@@ -1,9 +1,21 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+const CONTACTS = [
+  { label: "Work email", value: "rishi.pandey@tus.ie", href: "mailto:rishi.pandey@tus.ie" },
+  { label: "Personal email", value: "prishi34@gmail.com", href: "mailto:prishi34@gmail.com" },
+  { label: "Phone", value: "+353 89 973 2098", href: "tel:+353899732098" },
+  {
+    label: "LinkedIn",
+    value: "in/rishi-pandey-aiconsultation",
+    href: "https://www.linkedin.com/in/rishi-pandey-aiconsultation",
+    external: true,
+  },
+];
+
 const SOCIALS = [
   { label: "GitHub", href: "https://github.com/rustyz" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/rishi-pandey-aiengineer" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/rishi-pandey-aiconsultation" },
 ];
 
 export default function Contact() {
@@ -45,13 +57,23 @@ export default function Contact() {
           <h2 className="text-4xl md:text-6xl font-display italic text-text-primary mb-10">
             Let's build something real.
           </h2>
-          <a
-            href="mailto:prishi34@gmail.com"
-            className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base border-2 border-stroke text-text-primary relative group hover:border-transparent transition-all"
-          >
-            <span className="absolute -inset-[2px] rounded-full accent-gradient opacity-0 group-hover:opacity-100 -z-10 transition-opacity" />
-            prishi34@gmail.com <span aria-hidden>↗</span>
-          </a>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto text-left">
+            {CONTACTS.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                {...(c.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                className="relative group flex items-center justify-between gap-4 rounded-2xl border border-stroke bg-surface/60 px-5 py-4 hover:border-transparent transition-all"
+              >
+                <span className="absolute -inset-[1px] rounded-2xl accent-gradient opacity-0 group-hover:opacity-100 -z-10 transition-opacity" />
+                <span className="min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.2em] text-muted">{c.label}</span>
+                  <span className="block text-sm md:text-base text-text-primary truncate">{c.value}</span>
+                </span>
+                <span aria-hidden className="text-muted group-hover:text-text-primary">↗</span>
+              </a>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-stroke">

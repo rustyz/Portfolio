@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { projects } from "../data/projects";
+import { motion } from "framer-motion";
+import { projects, type Project } from "../data/projects";
 
 const spanFor = (i: number) => (i % 3 === 2 ? "md:col-span-7" : "md:col-span-5");
 const hueFor = (i: number) => (i * 47) % 360;
@@ -27,7 +27,7 @@ export default function SelectedWorks() {
               Featured <span className="italic">projects</span>
             </h2>
             <p className="text-sm md:text-base text-muted max-w-md">
-              Real projects — deployed agents, live ERP work, and the
+              Real projects — deployed agents, a live manufacturing platform, and the
               infrastructure most AI demos skip: evals, cost routing, and
               hybrid search. Cards without a public repo expand in place
               instead of linking to an empty page.
@@ -46,7 +46,7 @@ export default function SelectedWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
           {projects.map((project, i) => {
-            const isExpandable = !project.link;
+            const isExpandable = !project.link || !!project.caseStudy;
             const isExpanded = expandedId === project.id;
 
             const cardInner = (
@@ -97,7 +97,8 @@ export default function SelectedWorks() {
                 {isExpandable && !isExpanded && (
                   <div className="absolute inset-0 bg-bg/70 opacity-0 group-hover:opacity-100 backdrop-blur-lg transition-opacity duration-300 flex items-center justify-center p-6">
                     <span className="flex items-center gap-2 bg-surface text-text-primary rounded-full px-5 py-2.5 text-sm">
-                      Tap to read what's built <span aria-hidden>+</span>
+                      {project.video ? "Watch the demo & read the case study" : "Tap to read what's built"}{" "}
+                      <span aria-hidden>+</span>
                     </span>
                   </div>
                 )}
@@ -130,72 +131,152 @@ export default function SelectedWorks() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
                 viewport={{ once: true, margin: "-80px" }}
-                className={`${spanFor(i)} ${isExpanded ? "md:col-span-12" : ""}`}
+                className={isExpanded ? "md:col-span-12" : spanFor(i)}
               >
-                <motion.button
-                  layout
-                  type="button"
-                  onClick={() => setExpandedId(isExpanded ? null : project.id)}
-                  aria-expanded={isExpanded}
-                  className={`group relative w-full text-left rounded-3xl border border-stroke bg-surface overflow-hidden cursor-pointer ${
-                    isExpanded ? "" : "aspect-[4/3] md:aspect-auto md:h-72"
-                  }`}
-                >
-                  {!isExpanded && cardInner}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                      >
-                        <div className="relative">
-                          {project.image ? (
-                            <div
-                              className="h-48 md:h-64 bg-cover bg-center"
-                              style={{ backgroundImage: `url(${project.image})` }}
-                            />
-                          ) : (
-                            <div
-                              className="h-32"
-                              style={{
-                                background: `radial-gradient(circle at 30% 20%, hsl(${hueFor(i)} 60% 55%), transparent 70%)`,
-                              }}
-                            />
-                          )}
-                          <span className="absolute top-4 right-4 text-xs text-muted bg-bg/70 backdrop-blur rounded-full px-3 py-1">
-                            Close ✕
-                          </span>
-                        </div>
-                        <div className="p-6 md:p-8">
-                          <span className="text-xs text-muted uppercase tracking-[0.2em]">{project.category}</span>
-                          <h3 className="text-2xl md:text-3xl font-display text-text-primary mt-2 mb-4">
-                            {project.title}
-                          </h3>
-                          <p className="text-sm md:text-base text-muted leading-relaxed max-w-3xl mb-5">
-                            {project.details ?? project.description}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {project.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-xs text-muted border border-stroke rounded-full px-3 py-1"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
+                {!isExpanded ? (
+                  <motion.button
+                    layout
+                    type="button"
+                    onClick={() => setExpandedId(project.id)}
+                    aria-expanded={false}
+                    className="group relative w-full text-left rounded-3xl border border-stroke bg-surface overflow-hidden cursor-pointer aspect-[4/3] md:aspect-auto md:h-72"
+                  >
+                    {cardInner}
+                  </motion.button>
+                ) : (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="relative w-full text-left rounded-3xl border border-stroke bg-surface overflow-hidden"
+                  >
+                    <ExpandedProject project={project} hue={hueFor(i)} onClose={() => setExpandedId(null)} />
+                  </motion.div>
+                )}
               </motion.div>
             );
           })}
         </div>
       </div>
     </section>
+  );
+}
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-stroke bg-bg/60 px-4 py-2.5">
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted">{label}</div>
+        <div className="font-mono text-sm text-text-primary truncate">{value}</div>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          navigator.clipboard?.writeText(value).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          });
+        }}
+        className="shrink-0 text-xs text-muted border border-stroke rounded-full px-3 py-1 hover:text-text-primary transition-colors"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+function ExpandedProject({ project, hue, onClose }: { project: Project; hue: number; onClose: () => void }) {
+  return (
+    <div>
+      <div className="relative">
+        {project.video ? (
+          <video
+            className="w-full aspect-video bg-black"
+            src={project.video}
+            poster={project.videoPoster}
+            controls
+            playsInline
+            preload="metadata"
+          />
+        ) : project.image ? (
+          <div className="h-48 md:h-64 bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
+        ) : (
+          <div
+            className="h-32"
+            style={{ background: `radial-gradient(circle at 30% 20%, hsl(${hue} 60% 55%), transparent 70%)` }}
+          />
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-xs text-muted bg-bg/70 backdrop-blur rounded-full px-3 py-1 hover:text-text-primary"
+        >
+          Close ✕
+        </button>
+      </div>
+      <div className="p-6 md:p-8">
+        <span className="text-xs text-muted uppercase tracking-[0.2em]">{project.category}</span>
+        <h3 className="text-2xl md:text-3xl font-display text-text-primary mt-2 mb-4">{project.title}</h3>
+
+        {project.caseStudy ? (
+          <div className="grid md:grid-cols-12 gap-8">
+            <div className="md:col-span-8 space-y-6">
+              <p className="text-sm md:text-base text-muted leading-relaxed">{project.description}</p>
+              {project.caseStudy.map((sec) => (
+                <div key={sec.heading}>
+                  <h4 className="text-lg font-display text-text-primary mb-2">{sec.heading}</h4>
+                  {sec.body && <p className="text-sm text-muted leading-relaxed">{sec.body}</p>}
+                  {sec.bullets && (
+                    <ul className="space-y-2">
+                      {sec.bullets.map((b) => (
+                        <li key={b} className="text-sm text-muted leading-relaxed flex gap-3">
+                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-text-primary/60" />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+            {project.demo && (
+              <aside className="md:col-span-4">
+                <div className="md:sticky md:top-24 rounded-2xl border border-stroke bg-bg/40 p-5 space-y-3">
+                  <div className="text-xs uppercase tracking-[0.2em] text-muted">Try the live demo</div>
+                  <CopyField label="Username" value={project.demo.username} />
+                  <CopyField label="Password" value={project.demo.password} />
+                  <a
+                    href={project.demo.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative block rounded-full text-center group"
+                  >
+                    <span className="absolute -inset-[1px] rounded-full accent-gradient-animated" />
+                    <span className="relative block bg-surface text-text-primary rounded-full px-5 py-2.5 text-sm">
+                      {project.linkLabel ?? "Open live demo"} <span aria-hidden>↗</span>
+                    </span>
+                  </a>
+                  {project.demo.note && <p className="text-xs text-muted leading-relaxed">{project.demo.note}</p>}
+                </div>
+              </aside>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm md:text-base text-muted leading-relaxed max-w-3xl mb-5">
+            {project.details ?? project.description}
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2 mt-6">
+          {project.tags.map((tag) => (
+            <span key={tag} className="text-xs text-muted border border-stroke rounded-full px-3 py-1">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
